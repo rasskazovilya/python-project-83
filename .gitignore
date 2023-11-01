@@ -1,0 +1,10 @@
+*.egg-info
+__pycache__
+dist/
+*.pyc
+.venv/
+.vscode/
+.coverage
+coverage.xml
+.pytest_cache/
+pypoetry/

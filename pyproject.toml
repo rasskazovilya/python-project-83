@@ -4,10 +4,12 @@ version = "0.1.0"
 description = ""
 authors = ["Ilya <rasskazov.ilya.98@gmail.com>"]
 readme = "README.md"
-packages = [{include = "python_project_83"}]
+packages = [{include = "page_analyzer"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.1, <4.0"
+flask = "^3.0.0"
+gunicorn = "^21.2.0"
 
 
 [build-system]

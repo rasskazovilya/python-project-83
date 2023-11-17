@@ -20,7 +20,7 @@
 
           </div>
         </nav>
-      </header>
+    </header>
 
     <main class="flex-grow-1">
         <div class="container-lg mt-3">
@@ -39,14 +39,14 @@
                     <tbody>
                         {% for url in urls %}
                         <tr>
-                            <td>url.id</td>
+                            <td>{{url.id}}</td>
                             <td>
-                                <a href="{{url_for('get_url', id=url.id)}}">
-                                    url.name
+                                <a href="{{url_for('get_site', id=url.id)}}">
+                                    {{url.name}}
                                 </a>
                             </td>
-                            <td>url.created_at</td>
-                            <td>response_code</td>
+                            <td>{{url.created_at}}</td>
+                            <td>{{response_code}}</td>
                         </tr>
                         {% endfor %}
 

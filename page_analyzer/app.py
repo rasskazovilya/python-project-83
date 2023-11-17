@@ -40,7 +40,8 @@ def get_sites():
 def add_site():
     url = request.form.get("url")
     errors = urlparse(url)
-
+    if errors:
+        pass
     with conn.cursor() as curs:
         created_at = datetime.datetime.today()
         insert_query = """

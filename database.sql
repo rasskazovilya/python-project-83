@@ -12,4 +12,4 @@ CREATE TABLE url_checks (
     title text,
     description text,
     created_at timestamp
-)
+);

@@ -47,7 +47,7 @@ def add_check(conn, url_id, status_code, h1, title, desc):
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
         created_at = datetime.datetime.today().replace(microsecond=0)
 
-        add_check = """
+        add_check_query = """
         INSERT INTO url_checks (
             url_id,
             status_code,
@@ -58,7 +58,7 @@ def add_check(conn, url_id, status_code, h1, title, desc):
         ) VALUES (%s, %s, %s, %s, %s, %s);
         """
         curs.execute(
-            add_check,
+            add_check_query,
             (url_id, status_code, h1, title, desc, created_at)
         )
         conn.commit()

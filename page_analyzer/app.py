@@ -1,6 +1,7 @@
 import os
 import datetime
 from urllib.parse import urlparse
+from .url_validator import validate
 
 import psycopg2
 import psycopg2.extras
@@ -39,20 +40,27 @@ def get_sites():
 @app.post("/urls")
 def add_site():
     url = request.form.get("url")
-    errors = urlparse(url)
+
+    errors = validate(url)
     if errors:
-        pass
+        for error in errors:
+            flash(error, 'danger')
+        return render_template('index.html', code=422)
+
+    parsed_url = urlparse(url)
+    root_url = f'{parsed_url.scheme}:{parsed_url.netloc}'
+
     with conn.cursor() as curs:
         created_at = datetime.datetime.today()
         insert_query = """
         INSERT INTO urls (name, created_at)
         VALUES (%s, %s) RETURNING id;
         """
-        curs.execute(insert_query, (url, created_at))
+        curs.execute(insert_query, (root_url, created_at))
         conn.commit()
         id = curs.fetchone()[0]
-        print(id)
 
+    flash('Страница успешно добавлена', 'success')
     return redirect(url_for("get_site", id=id), code=302)
 
 

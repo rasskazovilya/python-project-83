@@ -51,7 +51,7 @@ def add_site():
     root_url = f'{parsed_url.scheme}:{parsed_url.netloc}'
 
     with conn.cursor() as curs:
-        created_at = datetime.datetime.today()
+        created_at = datetime.datetime.today().replace(microsecond=0)
         insert_query = """
         INSERT INTO urls (name, created_at)
         VALUES (%s, %s) RETURNING id;

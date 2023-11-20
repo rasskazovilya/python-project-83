@@ -2,6 +2,7 @@ import os
 from urllib.parse import urlparse
 
 import psycopg2
+import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from page_analyzer import db
@@ -66,8 +67,21 @@ def get_site(id):
 
 @app.post("/urls/<id>/checks")
 def check_site(id):
+    url = db.get_url(conn, id)
+    try:
+        response = requests.get(url['name'])
+    except requests.RequestException:
+        flash('Произошла ошибка при проверке', 'danger')
+        return redirect(url_for("get_site", id=id))
     # perform_check(url)
-    db.add_check(conn, id, 0, '', '', '')
+    db.add_check(
+        conn,
+        id,
+        response.status_code,
+        h1='',
+        title='',
+        desc=''
+    )
 
     flash('Страница успешно проверена', 'success')
-    return redirect(url_for("get_site", id=id), code=302)
+    return redirect(url_for("get_site", id=id))

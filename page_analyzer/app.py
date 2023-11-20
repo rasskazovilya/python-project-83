@@ -1,13 +1,13 @@
-import os
 import datetime
+import os
 from urllib.parse import urlparse
-from .url_validator import validate
 
 import psycopg2
-import psycopg2.extras
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
+from page_analyzer import db
 
+from .url_validator import validate
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -26,10 +26,7 @@ def index():
 
 @app.get("/urls")
 def get_sites():
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        select_all_query = "SELECT * FROM urls ORDER BY created_at DESC;"
-        curs.execute(select_all_query)
-        urls = curs.fetchall()
+    urls = db.get_urls(conn)
 
     return render_template(
         'url_table.html',
@@ -50,15 +47,7 @@ def add_site():
     parsed_url = urlparse(url)
     root_url = f'{parsed_url.scheme}://{parsed_url.netloc}'
 
-    with conn.cursor() as curs:
-        created_at = datetime.datetime.today().replace(microsecond=0)
-        insert_query = """
-        INSERT INTO urls (name, created_at)
-        VALUES (%s, %s) RETURNING id;
-        """
-        curs.execute(insert_query, (root_url, created_at))
-        conn.commit()
-        id = curs.fetchone()[0]
+    id = db.add_url(conn, root_url)
 
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for("get_site", id=id), code=302)
@@ -66,18 +55,8 @@ def add_site():
 
 @app.get("/urls/<id>")
 def get_site(id):
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        select_id_query = "SELECT * FROM urls WHERE id=%s;"
-        curs.execute(select_id_query, (id,))
-        url = curs.fetchone()
-
-        select_checks_query = """
-        SELECT * FROM url_checks
-        WHERE url_id=%s
-        ORDER BY created_at DESC;
-        """
-        curs.execute(select_checks_query, (id,))
-        checks = curs.fetchall()
+    url = db.get_url(conn, id)
+    checks = db.get_url_checks(conn, id)
 
     return render_template(
         'url.html',
@@ -88,21 +67,8 @@ def get_site(id):
 
 @app.post("/urls/<id>/checks")
 def check_site(id):
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        created_at = datetime.datetime.today().replace(microsecond=0)
-
-        add_check = """
-        INSERT INTO url_checks (
-            url_id,
-            status_code,
-            h1,
-            title,
-            description,
-            created_at
-        ) VALUES (%s, %s, %s, %s, %s, %s);
-        """
-        curs.execute(add_check, (id, 200, '', '', '', created_at))
-        conn.commit()
+    # perform_check(url)
+    db.add_check(conn, id, 0, '', '', '')
 
     flash('Страница успешно проверена', 'success')
     return redirect(url_for("get_site", id=id), code=302)

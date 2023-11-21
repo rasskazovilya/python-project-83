@@ -83,7 +83,7 @@ def check_site(id):
     except requests.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for("get_site", id=id))
-    # perform_check(url)
+
     bs = bs4.BeautifulSoup(response.text, 'html.parser')
     h1 = bs.h1.string if bs.h1 else ''
     title = bs.title.string if bs.title else ''

@@ -12,7 +12,6 @@ from .url_validator import validate
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-# conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -78,13 +77,12 @@ def get_site(id):
 def check_site(id):
     with psycopg2.connect(DATABASE_URL) as conn:
         url = db.get_url(conn, id)
+
     try:
         response = requests.get(url['name'])
         response.raise_for_status()
         if response.status_code != 200:
             raise requests.RequestException
-            # flash('Произошла ошибка при проверке', 'danger')
-            # return redirect(url_for("get_site", id=id))
     except requests.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for("get_site", id=id))

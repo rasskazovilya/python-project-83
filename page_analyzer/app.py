@@ -25,7 +25,7 @@ def index():
 
 
 @app.get("/urls")
-def get_sites():
+def get_urls():
     with psycopg2.connect(DATABASE_URL) as conn:
         urls = db.get_urls(conn)
 
@@ -36,7 +36,7 @@ def get_sites():
 
 
 @app.post("/urls")
-def add_site():
+def add_url():
     url = request.form.get("url")
 
     errors = validate(url)
@@ -52,18 +52,18 @@ def add_site():
         exist_url = db.get_url_by_name(conn, root_url)
     if exist_url:
         flash('Страница уже существует', 'info')
-        return redirect(url_for("get_site", id=exist_url['id']), code=302)
+        return redirect(url_for("get_url", id=exist_url['id']), code=302)
 
     with psycopg2.connect(DATABASE_URL) as conn:
         id = db.add_url(conn, root_url)
     flash('Страница успешно добавлена', 'success')
-    return redirect(url_for("get_site", id=id), code=302)
+    return redirect(url_for("get_url", id=id), code=302)
 
 
 @app.get("/urls/<id>")
-def get_site(id):
+def get_url(id):
     with psycopg2.connect(DATABASE_URL) as conn:
-        url = db.get_url(conn, id)
+        url = db.get_url_by_id(conn, id)
         checks = db.get_url_checks(conn, id)
 
     return render_template(
@@ -74,10 +74,10 @@ def get_site(id):
 
 
 @app.post("/urls/<id>/checks")
-def check_site(id):
+def check_url(id):
     with psycopg2.connect(DATABASE_URL) as conn:
-        url = db.get_url(conn, id)
-
+        url = db.get_url_by_id(conn, id)
+        print(url)
     try:
         response = requests.get(url['name'])
         response.raise_for_status()
@@ -85,7 +85,7 @@ def check_site(id):
             raise requests.RequestException
     except requests.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for("get_site", id=id))
+        return redirect(url_for("get_url", id=id))
 
     bs = bs4.BeautifulSoup(response.text, 'html.parser')
     h1 = bs.h1.string if bs.h1 else ''
@@ -104,4 +104,4 @@ def check_site(id):
         )
 
     flash('Страница успешно проверена', 'success')
-    return redirect(url_for("get_site", id=id))
+    return redirect(url_for("get_url", id=id))

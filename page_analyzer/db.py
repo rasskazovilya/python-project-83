@@ -33,7 +33,7 @@ def add_url(conn, url):
     return id
 
 
-def get_url(conn, id):
+def get_url_by_id(conn, id):
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
         select_id_query = "SELECT * FROM urls WHERE id=%s;"
         curs.execute(select_id_query, (id,))

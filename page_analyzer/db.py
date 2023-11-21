@@ -13,11 +13,12 @@ def get_urls(conn):
 
 def add_url(conn, url):
     with conn.cursor() as curs:
+        created_at = datetime.datetime.today().replace(microsecond=0)
         insert_query = """
-        INSERT INTO urls (name)
-        VALUES (%s) RETURNING id;
+        INSERT INTO urls (name, created_at)
+        VALUES (%s, %s) RETURNING id;
         """
-        curs.execute(insert_query, (url,))
+        curs.execute(insert_query, (url, created_at))
         conn.commit()
         id = curs.fetchone()[0]
     return id

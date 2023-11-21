@@ -54,7 +54,7 @@ def add_site():
     if exist_url:
         flash('Страница уже существует', 'info')
         return redirect(url_for("get_site", id=exist_url['id']), code=302)
-    
+
     with psycopg2.connect(DATABASE_URL) as conn:
         id = db.add_url(conn, root_url)
     flash('Страница успешно добавлена', 'success')
@@ -89,7 +89,7 @@ def check_site(id):
     title = bs.title.string if bs.title else ''
     desc_tag = bs.find('meta', attrs={'name': 'description'})
     desc = desc_tag.get('content') if desc_tag else ''
-    
+
     with psycopg2.connect(DATABASE_URL) as conn:
         db.add_check(
             conn,

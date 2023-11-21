@@ -31,6 +31,14 @@ def get_url(conn, id):
     return url
 
 
+def get_url_by_name(conn, name):
+    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
+        select_name_query = "SELECT * FROM urls WHERE name=%s;"
+        curs.execute(select_name_query, (name,))
+        url = curs.fetchone()
+    return url
+
+
 def get_url_checks(conn, url_id):
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
         select_checks_query = """

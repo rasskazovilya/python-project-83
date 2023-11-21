@@ -80,6 +80,11 @@ def check_site(id):
         url = db.get_url(conn, id)
     try:
         response = requests.get(url['name'])
+        response.raise_for_status()
+        if response.status_code != 200:
+            raise requests.RequestException
+            # flash('Произошла ошибка при проверке', 'danger')
+            # return redirect(url_for("get_site", id=id))
     except requests.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for("get_site", id=id))

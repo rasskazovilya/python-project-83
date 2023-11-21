@@ -12,7 +12,7 @@ from .url_validator import validate
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
+# conn = psycopg2.connect(DATABASE_URL)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -27,7 +27,8 @@ def index():
 
 @app.get("/urls")
 def get_sites():
-    urls = db.get_urls(conn)
+    with psycopg2.connect(DATABASE_URL) as conn:
+        urls = db.get_urls(conn)
 
     return render_template(
         'url_table.html',
@@ -48,20 +49,23 @@ def add_site():
     parsed_url = urlparse(url)
     root_url = f'{parsed_url.scheme}://{parsed_url.netloc}'
 
-    exist_url = db.get_url_by_name(conn, root_url)
+    with psycopg2.connect(DATABASE_URL) as conn:
+        exist_url = db.get_url_by_name(conn, root_url)
     if exist_url:
         flash('Страница уже существует', 'info')
         return redirect(url_for("get_site", id=exist_url['id']), code=302)
-
-    id = db.add_url(conn, root_url)
+    
+    with psycopg2.connect(DATABASE_URL) as conn:
+        id = db.add_url(conn, root_url)
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for("get_site", id=id), code=302)
 
 
 @app.get("/urls/<id>")
 def get_site(id):
-    url = db.get_url(conn, id)
-    checks = db.get_url_checks(conn, id)
+    with psycopg2.connect(DATABASE_URL) as conn:
+        url = db.get_url(conn, id)
+        checks = db.get_url_checks(conn, id)
 
     return render_template(
         'url.html',
@@ -72,7 +76,8 @@ def get_site(id):
 
 @app.post("/urls/<id>/checks")
 def check_site(id):
-    url = db.get_url(conn, id)
+    with psycopg2.connect(DATABASE_URL) as conn:
+        url = db.get_url(conn, id)
     try:
         response = requests.get(url['name'])
     except requests.RequestException:
@@ -84,15 +89,16 @@ def check_site(id):
     title = bs.title.string if bs.title else ''
     desc_tag = bs.find('meta', attrs={'name': 'description'})
     desc = desc_tag.get('content') if desc_tag else ''
-
-    db.add_check(
-        conn,
-        id,
-        response.status_code,
-        h1=h1,
-        title=title,
-        desc=desc
-    )
+    
+    with psycopg2.connect(DATABASE_URL) as conn:
+        db.add_check(
+            conn,
+            id,
+            response.status_code,
+            h1=h1,
+            title=title,
+            desc=desc
+        )
 
     flash('Страница успешно проверена', 'success')
     return redirect(url_for("get_site", id=id))

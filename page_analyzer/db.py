@@ -5,7 +5,16 @@ import datetime
 
 def get_urls(conn):
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        select_all_query = "SELECT * FROM urls ORDER BY created_at DESC;"
+        select_all_query = """
+        SELECT urls.id,
+            name,
+            MAX(url_checks.created_at) AS last_date,
+            status_code
+        FROM urls
+        LEFT JOIN url_checks ON urls.id = url_checks.url_id
+        GROUP BY urls.id, status_code
+        ORDER BY urls.id DESC;
+        """
         curs.execute(select_all_query)
         urls = curs.fetchall()
     return urls

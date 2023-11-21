@@ -81,7 +81,7 @@ def check_site(id):
     # perform_check(url)
     bs = bs4.BeautifulSoup(response.text, 'html.parser')
     h1 = bs.h1.string if bs.h1 else ''
-    title = bs.title.string() if bs.title else ''
+    title = bs.title.string if bs.title else ''
     desc_tag = bs.find('meta', attrs={'name': 'description'})
     desc = desc_tag.get('content') if desc_tag else ''
 

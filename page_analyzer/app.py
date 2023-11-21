@@ -48,8 +48,12 @@ def add_site():
     parsed_url = urlparse(url)
     root_url = f'{parsed_url.scheme}://{parsed_url.netloc}'
 
-    id = db.add_url(conn, root_url)
+    exist_url = db.get_url_by_name(conn, root_url)
+    if exist_url:
+        flash('Страница уже существует', 'info')
+        return redirect(url_for("get_site", id=exist_url['id']), code=302)
 
+    id = db.add_url(conn, root_url)
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for("get_site", id=id), code=302)
 

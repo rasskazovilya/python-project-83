@@ -44,7 +44,7 @@ def add_site():
     if errors:
         for error in errors:
             flash(error, 'danger')
-        return render_template('index.html', code=422)
+        return render_template('index.html'), 422
 
     parsed_url = urlparse(url)
     root_url = f'{parsed_url.scheme}://{parsed_url.netloc}'

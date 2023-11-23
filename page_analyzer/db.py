@@ -33,18 +33,15 @@ def add_url(conn, url):
     return id
 
 
-def get_url_by_id(conn, id):
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        select_id_query = "SELECT * FROM urls WHERE id=%s;"
-        curs.execute(select_id_query, (id,))
-        url = curs.fetchone()
-    return url
+def get_url(conn, cond, value):
+    conditions = {
+        'name': 'WHERE name=%s;',
+        'id': 'WHERE id=%s;'
+    }
 
-
-def get_url_by_name(conn, name):
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-        select_name_query = "SELECT * FROM urls WHERE name=%s;"
-        curs.execute(select_name_query, (name,))
+        select_name_query = "SELECT * FROM urls " + conditions[cond]
+        curs.execute(select_name_query, (value,))
         url = curs.fetchone()
     return url
 

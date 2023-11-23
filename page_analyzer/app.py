@@ -49,7 +49,7 @@ def add_url():
     root_url = f'{parsed_url.scheme}://{parsed_url.netloc}'
 
     with psycopg2.connect(DATABASE_URL) as conn:
-        exist_url = db.get_url_by_name(conn, root_url)
+        exist_url = db.get_url(conn, cond='name', value=root_url)
     if exist_url:
         flash('Страница уже существует', 'info')
         return redirect(url_for("get_url", id=exist_url['id']), code=302)
@@ -63,7 +63,7 @@ def add_url():
 @app.get("/urls/<id>")
 def get_url(id):
     with psycopg2.connect(DATABASE_URL) as conn:
-        url = db.get_url_by_id(conn, id)
+        url = db.get_url(conn, cond='id', value=id)
         checks = db.get_url_checks(conn, id)
 
     return render_template(
@@ -76,7 +76,7 @@ def get_url(id):
 @app.post("/urls/<id>/checks")
 def check_url(id):
     with psycopg2.connect(DATABASE_URL) as conn:
-        url = db.get_url_by_id(conn, id)
+        url = db.get_url(conn, cond='id', value=id)
         print(url)
     try:
         response = requests.get(url['name'])

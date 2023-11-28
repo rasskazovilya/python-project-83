@@ -9,21 +9,49 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 
+def get_checks():
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
+            select_all_url_checks_query = """
+            SELECT url_id, created_at, status_code
+            FROM url_checks
+            ORDER BY created_at DESC;
+            """
+            curs.execute(select_all_url_checks_query)
+            url_checks = curs.fetchall()
+    return url_checks
+
+
 def get_urls():
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-            select_all_query = """
-            SELECT urls.id,
-                name,
-                MAX(url_checks.created_at) AS last_date,
-                status_code
-            FROM urls
-            LEFT JOIN url_checks ON urls.id = url_checks.url_id
-            GROUP BY urls.id, status_code
-            ORDER BY urls.id DESC;
+            select_all_url_id_query = """
+            SELECT id, name FROM urls
+            ORDER BY id DESC;
             """
-            curs.execute(select_all_query)
+            curs.execute(select_all_url_id_query)
             urls = curs.fetchall()
+    return urls
+
+
+def get_urls_and_checks():
+    url_names = get_urls()
+    checks = get_checks()
+
+    urls = []
+    for url in url_names:
+        url_id = url["id"]
+        check = next(
+            (check for check in checks if check["url_id"] == url_id), dict()
+        )
+        urls.append(
+            {
+                "id": url_id,
+                "name": url["name"],
+                "last_date": check.get("created_at", None),
+                "status_code": check.get("status_code", None),
+            }
+        )
     return urls
 
 

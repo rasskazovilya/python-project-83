@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 
-import bs4
+import page_analyzer.seo as seo
 import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
@@ -73,13 +73,9 @@ def check_url(id):
         flash("Произошла ошибка при проверке", "danger")
         return redirect(url_for("get_url", id=id))
 
-    bs = bs4.BeautifulSoup(response.text, "html.parser")
-    h1 = bs.h1.string if bs.h1 else ""
-    title = bs.title.string if bs.title else ""
-    desc_tag = bs.find("meta", attrs={"name": "description"})
-    desc = desc_tag.get("content") if desc_tag else ""
+    seo_data = seo.get_seo_data(response)
 
-    db.add_check(id, response.status_code, h1, title, desc)
+    db.add_check(id, response.status_code, seo_data)
 
     flash("Страница успешно проверена", "success")
     return redirect(url_for("get_url", id=id))

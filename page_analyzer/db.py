@@ -9,34 +9,25 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 
-def get_checks():
+def get_all(table):
+    queries = {
+        "urls": "SELECT * FROM urls;",
+        "url_checks": "SELECT * FROM url_checks;",
+    }
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-            select_all_url_checks_query = """
-            SELECT url_id, created_at, status_code
-            FROM url_checks
-            ORDER BY created_at DESC;
-            """
-            curs.execute(select_all_url_checks_query)
-            url_checks = curs.fetchall()
-    return url_checks
-
-
-def get_urls():
-    with psycopg2.connect(DATABASE_URL) as conn:
-        with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
-            select_all_url_id_query = """
-            SELECT id, name FROM urls
-            ORDER BY id DESC;
-            """
-            curs.execute(select_all_url_id_query)
-            urls = curs.fetchall()
-    return urls
+            curs.execute(queries[table])
+            results = curs.fetchall()
+    return results
 
 
 def get_urls_and_checks():
-    url_names = get_urls()
-    checks = get_checks()
+    # url_names = get_urls()
+    # checks = get_checks()
+    url_names = get_all("urls")
+    url_names.sort(key=lambda x: x["id"], reverse=True)
+    checks = get_all("url_checks")
+    checks.sort(key=lambda x: x["created_at"], reverse=True)
 
     urls = []
     for url in url_names:

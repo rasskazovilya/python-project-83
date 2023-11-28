@@ -23,7 +23,7 @@ def index():
 
 @app.get("/urls")
 def get_urls():
-    urls = db.get_urls()
+    urls = db.get_urls_and_checks()
 
     return render_template("url_table.html", urls=urls)
 

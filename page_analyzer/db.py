@@ -92,7 +92,7 @@ def get_url_checks(url_id):
     return checks
 
 
-def add_check(url_id, status_code, h1, title, desc):
+def add_check(url_id, status_code, seo_data):
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as curs:
             created_at = datetime.datetime.today().replace(microsecond=0)
@@ -109,7 +109,14 @@ def add_check(url_id, status_code, h1, title, desc):
             """
             curs.execute(
                 add_check_query,
-                (url_id, status_code, h1, title, desc, created_at),
+                (
+                    url_id,
+                    status_code,
+                    seo_data["h1"],
+                    seo_data["title"],
+                    seo_data["desc"],
+                    created_at,
+                ),
             )
             conn.commit()
     return

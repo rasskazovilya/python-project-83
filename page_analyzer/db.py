@@ -22,8 +22,6 @@ def get_all(table):
 
 
 def get_urls_and_checks():
-    # url_names = get_urls()
-    # checks = get_checks()
     url_names = get_all("urls")
     url_names.sort(key=lambda x: x["id"], reverse=True)
     checks = get_all("url_checks")

@@ -81,7 +81,7 @@ def add_check(url_id, status_code, h1, title, desc):
             """
             curs.execute(
                 add_check_query,
-                (url_id, status_code, h1, title, desc, created_at)
+                (url_id, status_code, h1, title, desc, created_at),
             )
             conn.commit()
     return
